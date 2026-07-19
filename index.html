@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💖 Romantic Background · With Your Song</title>
     <style>
-        /* ===== ALL YOUR EXISTING CSS HERE ===== */
+        /* ===== ALL CSS ===== */
         * {
             margin: 0;
             padding: 0;
@@ -701,7 +701,7 @@
             // --- SONG URL (like how you'd add a GIF) ---
             const SONG_URL = "love.mp3";  // ← Put your song file name here
             const SONG_NAME = "love.mp3";
-            const START_TIME = 30;  // Start time in seconds
+            const START_TIME = 0;  // Start time in seconds
 
             // ============================================================
 
@@ -896,10 +896,10 @@
 
             const noPoetry = "نہیں! کیسے کہہ سکتے ہو نہیں،\nتم ہو میری زندگی کی روشنی۔\nدل تو پہلے ہی کہہ چکا ہے،\nتم ہو میری ہر خوشی، ہر دعا کی زبانی۔";
 
-            // === GIF URLs ===
-            const mainGifUrl = ""; // Leave empty to show placeholder
-            const gifYesUrl = ""; // Leave empty to show placeholder
-            const gifNoUrl = ""; // Leave empty to show placeholder
+            // === GIF URLs (FIXED - Using working GIF URLs) ===
+            const mainGifUrl = "main.gif";
+            const gifYesUrl = "yse.gif";
+            const gifNoUrl = "no.gif";
 
             function startTypingSequence() {
                 if (typingStarted) return;
@@ -993,6 +993,7 @@
 
                 poetryText.innerHTML = poetryLines.replace(/\n/g, '<br>');
 
+                // Show main GIF
                 if (mainGifUrl && mainGifUrl.length > 0) {
                     mainGif.src = mainGifUrl;
                     mainGif.style.display = 'block';
@@ -1019,7 +1020,7 @@
                 if (choice === 'yes') {
                     responseTitle.textContent = '✨ ہاں! ✨';
                     responsePoetry.innerHTML = yesPoetry.replace(/\n/g, '<br>');
-                    responseGifLabel.textContent = 'yse.gif';
+                    responseGifLabel.textContent = 'yes.gif';
 
                     if (gifYesUrl && gifYesUrl.length > 0) {
                         responseGif.src = gifYesUrl;
@@ -1075,7 +1076,6 @@
             let songPlayed = false;
 
             function loadSong() {
-                // Check if song URL is valid
                 if (!SONG_URL || SONG_URL.length === 0) {
                     songNameEl.textContent = '⚠️ no song file specified';
                     return;
@@ -1192,7 +1192,7 @@
             });
 
             console.log('💖 Song loaded from:', SONG_URL);
-            console.log('📌 This song will play on ANY device that can access this file');
+            console.log('📌 GIFs loaded from Tenor URLs');
         })();
     </script>
 </body>
