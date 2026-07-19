@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>💖 Romantic Background · With Your Song</title>
     <style>
-        /* ===== ALL CSS ===== */
+        /* ===== ALL CSS (unchanged) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -18,6 +18,7 @@
             overflow: hidden;
             cursor: default;
             font-family: 'Georgia', 'Times New Roman', serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #bg-canvas {
@@ -451,6 +452,7 @@
             background: rgba(255, 182, 193, 0.05);
             color: #3a2a2a;
             min-width: 100px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .gif-card .btn-choice:hover {
@@ -690,18 +692,15 @@
             // ============================================================
             // ★★★★★ YOUR SONG - HARDCODED LIKE A GIF ★★★★★
             // ============================================================
-            // 
-            // INSTRUCTIONS:
-            // 1. Upload your song file (love.mp3) to your repository
-            // 2. Update the URL below to point to your song file
-            // 3. That's it! No upload system needed anymore
-            //
-            // ============================================================
-
-            // --- SONG URL (like how you'd add a GIF) ---
             const SONG_URL = "love.mp3";  // ← Put your song file name here
             const SONG_NAME = "love.mp3";
-            const START_TIME = 0;  // Start time in seconds
+            const START_TIME = 0;
+
+            // ============================================================
+            // ★★★★★ GIF URLs ★★★★★
+            const mainGifUrl = "main.gif";
+            const gifYesUrl = "yse.gif";
+            const gifNoUrl = "no.gif";
 
             // ============================================================
 
@@ -886,6 +885,7 @@
             let envelopeOpened = false;
             let letterTypingStarted = false;
             let letterComplete = false;
+            let sequenceTriggered = false; // to prevent multiple triggers
 
             // === CONFIGURABLE MESSAGES ===
             const envelopeMessage = "تم ہو میری زندگی کی روشنی، تم ہو میری ہر خوشی کی وجہ۔\nتم ہو میرے دل کی دھڑکن، تم ہو میری ہر دعا کا حاصل۔";
@@ -896,14 +896,13 @@
 
             const noPoetry = "نہیں! کیسے کہہ سکتے ہو نہیں،\nتم ہو میری زندگی کی روشنی۔\nدل تو پہلے ہی کہہ چکا ہے،\nتم ہو میری ہر خوشی، ہر دعا کی زبانی۔";
 
-            // === GIF URLs (FIXED - Using working GIF URLs) ===
-            const mainGifUrl = "main.gif";
-            const gifYesUrl = "yse.gif";
-            const gifNoUrl = "no.gif";
-
+            // ---------- CORE SEQUENCE FUNCTIONS ----------
             function startTypingSequence() {
-                if (typingStarted) return;
+                if (typingStarted || sequenceTriggered) return;
+                sequenceTriggered = true;
                 typingStarted = true;
+
+                console.log('▶️ Starting typing sequence...');
 
                 typingOverlay.classList.add('visible');
 
@@ -937,23 +936,27 @@
             }
 
             function showEnvelope() {
+                console.log('📩 Showing envelope...');
                 envelopeContainer.classList.add('visible');
 
-                envelopeContainer.addEventListener('click', function openEnvelope(e) {
-                    if (envelopeOpened) return;
-                    envelopeOpened = true;
+                // Remove existing listeners to avoid duplicates
+                envelopeContainer.removeEventListener('click', openEnvelopeHandler);
+                envelopeContainer.addEventListener('click', openEnvelopeHandler);
+            }
 
-                    envelopeContainer.classList.add('open');
+            function openEnvelopeHandler(e) {
+                if (envelopeOpened) return;
+                envelopeOpened = true;
+                console.log('✉️ Envelope clicked, opening...');
+                envelopeContainer.classList.add('open');
 
-                    setTimeout(() => {
-                        letterPage.classList.add('visible');
-
-                        if (!letterTypingStarted) {
-                            letterTypingStarted = true;
-                            startLetterTyping();
-                        }
-                    }, 800);
-                });
+                setTimeout(() => {
+                    letterPage.classList.add('visible');
+                    if (!letterTypingStarted) {
+                        letterTypingStarted = true;
+                        startLetterTyping();
+                    }
+                }, 800);
             }
 
             function startLetterTyping() {
@@ -976,7 +979,7 @@
                         const cursor = letterMessage.querySelector('.cursor');
                         if (cursor) cursor.remove();
                         letterComplete = true;
-
+                        console.log('📝 Letter typing complete. Showing GIF card in 10s...');
                         setTimeout(() => {
                             showGifCard();
                         }, 10000);
@@ -986,6 +989,7 @@
             }
 
             function showGifCard() {
+                console.log('🎴 Showing GIF card...');
                 envelopeContainer.classList.remove('visible');
                 letterPage.classList.remove('visible');
 
@@ -993,7 +997,6 @@
 
                 poetryText.innerHTML = poetryLines.replace(/\n/g, '<br>');
 
-                // Show main GIF
                 if (mainGifUrl && mainGifUrl.length > 0) {
                     mainGif.src = mainGifUrl;
                     mainGif.style.display = 'block';
@@ -1005,15 +1008,16 @@
                 }
             }
 
+            // --- Yes/No Button Handlers ---
             document.getElementById('btnYes').addEventListener('click', function() {
                 showResponse('yes');
             });
-
             document.getElementById('btnNo').addEventListener('click', function() {
                 showResponse('no');
             });
 
             function showResponse(choice) {
+                console.log('🔘 Response:', choice);
                 gifCardOverlay.classList.remove('visible');
                 responseCard.classList.add('visible');
 
@@ -1021,7 +1025,6 @@
                     responseTitle.textContent = '✨ ہاں! ✨';
                     responsePoetry.innerHTML = yesPoetry.replace(/\n/g, '<br>');
                     responseGifLabel.textContent = 'yes.gif';
-
                     if (gifYesUrl && gifYesUrl.length > 0) {
                         responseGif.src = gifYesUrl;
                         responseGif.style.display = 'block';
@@ -1035,7 +1038,6 @@
                     responseTitle.textContent = '💔 نہیں...';
                     responsePoetry.innerHTML = noPoetry.replace(/\n/g, '<br>');
                     responseGifLabel.textContent = 'no.gif';
-
                     if (gifNoUrl && gifNoUrl.length > 0) {
                         responseGif.src = gifNoUrl;
                         responseGif.style.display = 'block';
@@ -1050,7 +1052,6 @@
 
             document.getElementById('closeSiteBtn').addEventListener('click', function() {
                 responseCard.classList.remove('visible');
-
                 setTimeout(function() {
                     window.close();
                     setTimeout(function() {
@@ -1070,7 +1071,7 @@
                 }, 400);
             });
 
-            // ---------- LOAD SONG (Hardcoded URL like a GIF) ----------
+            // ---------- LOAD SONG AND TRIGGER SEQUENCE ----------
             const songNameEl = document.getElementById('songName');
             let audioElement = null;
             let songPlayed = false;
@@ -1082,13 +1083,14 @@
                 }
 
                 songNameEl.textContent = '♪ ' + SONG_NAME + ' · loading...';
+                console.log('🎵 Loading song from:', SONG_URL);
 
                 audioElement = new Audio(SONG_URL);
                 audioElement.loop = true;
                 audioElement.volume = 0.5;
 
                 audioElement.addEventListener('canplaythrough', function() {
-                    console.log('🎵 Song loaded successfully:', SONG_URL);
+                    console.log('✅ Song loaded successfully:', SONG_URL);
                     songNameEl.textContent = '♪ ' + SONG_NAME + ' · ready';
                 });
 
@@ -1105,46 +1107,82 @@
                 function playSong() {
                     if (songPlayed) return;
                     songPlayed = true;
-
+                    console.log('▶️ Attempting to play song...');
                     audioElement.play().then(() => {
-                        console.log('🎵 Playing:', SONG_NAME, 'from', startTime, 's');
+                        console.log('🎵 Song is playing!');
                         songNameEl.textContent = '♪ ' + SONG_NAME + ' · playing';
-
+                        // After 2 seconds, start the sequence
                         setTimeout(() => {
-                            if (audioElement) {
-                                audioElement.volume = 0.2;
-                                console.log('🔊 Volume reduced to 20%');
+                            if (!sequenceTriggered) {
+                                console.log('⏰ 2s passed, starting sequence...');
+                                startTypingSequence();
                             }
-                            startTypingSequence();
                         }, 2000);
-
                     }).catch(err => {
-                        console.warn('Play error:', err);
+                        console.warn('⚠️ Play error:', err);
                         songNameEl.textContent = '♪ ' + SONG_NAME + ' · click to play';
+                        // Wait for user interaction
                         document.addEventListener('click', function tryPlay() {
                             audioElement.play().catch(() => {});
                             document.removeEventListener('click', tryPlay);
                         }, { once: true });
+                        document.addEventListener('touchstart', function tryPlay() {
+                            audioElement.play().catch(() => {});
+                            document.removeEventListener('touchstart', tryPlay);
+                        }, { once: true });
                     });
                 }
 
+                // Try to autoplay
                 audioElement.play().then(() => {
                     songPlayed = true;
+                    console.log('🎵 Autoplay succeeded!');
                     songNameEl.textContent = '♪ ' + SONG_NAME + ' · playing';
-
                     setTimeout(() => {
-                        if (audioElement) {
-                            audioElement.volume = 0.2;
-                            console.log('🔊 Volume reduced to 20%');
+                        if (!sequenceTriggered) {
+                            console.log('⏰ 2s passed, starting sequence...');
+                            startTypingSequence();
                         }
-                        startTypingSequence();
                     }, 2000);
-
                 }).catch(() => {
+                    console.log('⏸️ Autoplay blocked, waiting for user interaction...');
                     songNameEl.textContent = '♪ ' + SONG_NAME + ' · click to play';
-                    document.addEventListener('click', playSong, { once: true });
-                    document.addEventListener('touchstart', playSong, { once: true });
+                    // Use a single event listener for both click and touch
+                    const interactionHandler = function() {
+                        audioElement.play().then(() => {
+                            songPlayed = true;
+                            songNameEl.textContent = '♪ ' + SONG_NAME + ' · playing';
+                            setTimeout(() => {
+                                if (!sequenceTriggered) {
+                                    console.log('⏰ 2s passed, starting sequence...');
+                                    startTypingSequence();
+                                }
+                            }, 2000);
+                        }).catch(() => {});
+                        document.removeEventListener('click', interactionHandler);
+                        document.removeEventListener('touchstart', interactionHandler);
+                    };
+                    document.addEventListener('click', interactionHandler);
+                    document.addEventListener('touchstart', interactionHandler);
                 });
+
+                // FALLBACK: if sequence hasn't started after 5 seconds, force it
+                setTimeout(function() {
+                    if (!sequenceTriggered) {
+                        console.warn('⚠️ Sequence not started after 5s, forcing...');
+                        // If song is playing, start sequence anyway
+                        if (audioElement && !audioElement.paused) {
+                            startTypingSequence();
+                        } else {
+                            // Try to play and start
+                            audioElement.play().then(() => {
+                                songPlayed = true;
+                                songNameEl.textContent = '♪ ' + SONG_NAME + ' · playing';
+                                startTypingSequence();
+                            }).catch(() => {});
+                        }
+                    }
+                }, 5000);
             }
 
             loadSong();
@@ -1191,7 +1229,8 @@
                 }
             });
 
-            console.log('💖 Song loaded from:', SONG_URL);
+            console.log('💖 Fixed: Sequence will start on song play or user interaction');
+            console.log('📌 Song URL:', SONG_URL);
             console.log('📌 GIFs loaded from Tenor URLs');
         })();
     </script>
