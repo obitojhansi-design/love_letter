@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖 Romantic Background · With Your Song</title>
+    <style>
+        /* ===== ALL YOUR EXISTING CSS HERE (KEEP AS IS) ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0510;
+            overflow: hidden;
+            cursor: default;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            display: block;
+        }
+
+        .petal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .petal {
+            position: absolute;
+            color: rgba(255, 182, 193, 0.3);
+            font-size: 1.4rem;
+            animation: fall linear infinite;
+            opacity: 0;
+            user-select: none;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg) scale(0.6); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(110vh) rotate(720deg) scale(1.2); opacity: 0; }
+        }
+
+        @media (max-width: 550px) {
+            .petal { font-size: 1rem; }
+        }
+
+        .upload-link {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 20;
+            background: rgba(255, 182, 193, 0.06);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 182, 193, 0.08);
+            border-radius: 30px;
+            padding: 8px 18px;
+            color: rgba(255, 220, 230, 0.25);
+            font-family: 'Georgia', serif;
+            font-size: 0.65rem;
+            text-decoration: none;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            font-style: italic;
+        }
+
+        .upload-link:hover {
+            background: rgba(255, 182, 193, 0.1);
+            border-color: rgba(255, 182, 193, 0.15);
+            color: rgba(255, 220, 230, 0.5);
+        }
+
+        .song-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            color: rgba(255, 220, 230, 0.08);
+            font-family: 'Georgia', serif;
+            font-size: 0.55rem;
+            letter-spacing: 3px;
+            font-style: italic;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .song-indicator .name {
+            color: rgba(255, 182, 193, 0.15);
+        }
+
+        .credit {
+            position: fixed;
+            bottom: 20px;
+            right: 24px;
+            color: rgba(255, 182, 193, 0.04);
+            font-size: 0.5rem;
+            letter-spacing: 3px;
+            z-index: 2;
+            pointer-events: none;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+        }
+
+        /* ===== TYPING OVERLAY ===== */
+        .typing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .typing-overlay.visible {
+            opacity: 1;
+        }
+
+        .typing-text-display {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 2.2rem;
+            font-weight: 400;
+            color: rgba(255, 240, 235, 0.85);
+            text-shadow: 0 0 60px rgba(255, 105, 180, 0.15), 0 0 120px rgba(255, 105, 180, 0.05);
+            text-align: center;
+            max-width: 80%;
+            line-height: 1.6;
+            letter-spacing: 1px;
+            direction: rtl;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 32px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 182, 193, 0.04);
+        }
+
+        .typing-text-display .cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.2em;
+            background: rgba(255, 182, 193, 0.4);
+            margin-right: 4px;
+            animation: blink 0.8s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* ===== ENVELOPE ===== */
+        .envelope-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .envelope-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .envelope-container.visible:hover .envelope {
+            transform: scale(1.02);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 105, 180, 0.05);
+        }
+
+        .envelope {
+            position: relative;
+            width: 320px;
+            height: 200px;
+            background: linear-gradient(145deg, #f5e6d3, #e8d5c4);
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+
+        .envelope-container.visible .envelope {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: none;
+        }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #f5e6d3, #e8d5c4);
+            border-radius: 8px 8px 0 0;
+            clip-path: polygon(0 0, 50% 60%, 100% 0);
+            transition: all 1.2s ease;
+            transform-origin: top;
+            z-index: 2;
+        }
+
+        .envelope-container.open .envelope::before {
+            transform: rotateX(180deg);
+            clip-path: polygon(0 0, 50% 60%, 100% 0);
+        }
+
+        .envelope::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(to right, transparent 48%, rgba(200, 180, 160, 0.3) 48%, rgba(200, 180, 160, 0.3) 52%, transparent 52%),
+                linear-gradient(to bottom, transparent 48%, rgba(200, 180, 160, 0.2) 48%, rgba(200, 180, 160, 0.2) 52%, transparent 52%);
+            border-radius: 0 0 8px 8px;
+            z-index: 1;
+        }
+
+        .envelope .seal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.4rem;
+            z-index: 3;
+            color: #d4738a;
+            text-shadow: 0 2px 20px rgba(212, 115, 138, 0.3);
+            animation: sealPulse 2s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        .envelope .click-hint {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Georgia', serif;
+            font-size: 0.7rem;
+            color: rgba(255, 220, 230, 0.15);
+            letter-spacing: 2px;
+            font-style: italic;
+            white-space: nowrap;
+            animation: hintPulse 2s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes sealPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* ===== LETTER PAGE ===== */
+        .letter-page {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.3) rotate(-5deg);
+            z-index: 9;
+            width: 85%;
+            max-width: 620px;
+            background: rgba(255, 248, 240, 0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 28px 12px 28px 12px;
+            padding: 3rem 3rem 3.5rem;
+            box-shadow: 0 60px 120px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 182, 193, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            direction: rtl;
+        }
+
+        .letter-page.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            pointer-events: auto;
+        }
+
+        .letter-page .page-icon {
+            font-size: 2.6rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            animation: pulseHeart 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseHeart {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .letter-page h2 {
+            font-family: 'Georgia', serif;
+            font-size: 1.8rem;
+            color: #2a1a1a;
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+            direction: rtl;
+        }
+
+        .letter-page .divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #d4738a, transparent);
+            margin: 0.5rem auto 1.2rem;
+        }
+
+        .letter-page .message-text {
+            font-family: 'Georgia', serif;
+            font-size: 1.2rem;
+            color: #3a2a2a;
+            line-height: 2;
+            letter-spacing: 0.5px;
+            direction: rtl;
+            font-weight: 400;
+            min-height: 60px;
+        }
+
+        .letter-page .message-text .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: #d4738a;
+            margin-right: 4px;
+            animation: blink 0.8s infinite;
+            vertical-align: text-bottom;
+        }
+
+        .letter-page .footer-love {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: rgba(42, 26, 26, 0.3);
+            font-style: italic;
+            letter-spacing: 2px;
+            direction: ltr;
+        }
+
+        /* ===== GIF CARD ===== */
+        .gif-card-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(6px);
+        }
+
+        .gif-card-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .gif-card {
+            background: rgba(255, 248, 240, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px 16px 32px 16px;
+            padding: 2.5rem 2.5rem 3rem;
+            max-width: 520px;
+            width: 92%;
+            box-shadow: 0 60px 120px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 182, 193, 0.1);
+            text-align: center;
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .gif-card-overlay.visible .gif-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .gif-card .gif-container {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            margin: 0 auto 1.2rem;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #1a0e1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 182, 193, 0.1);
+            position: relative;
+        }
+
+        .gif-card .gif-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gif-card .gif-container .gif-placeholder {
+            color: rgba(255, 220, 230, 0.2);
+            font-size: 3rem;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+        }
+
+        .gif-card .poetry-text {
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            color: #3a2a2a;
+            line-height: 2;
+            letter-spacing: 0.5px;
+            direction: rtl;
+            margin: 0.8rem 0 1.5rem;
+            padding: 0.5rem;
+            min-height: 50px;
+        }
+
+        .gif-card .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .gif-card .btn-choice {
+            padding: 0.7rem 2.5rem;
+            border-radius: 60px;
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 182, 193, 0.2);
+            background: rgba(255, 182, 193, 0.05);
+            color: #3a2a2a;
+            min-width: 100px;
+        }
+
+        .gif-card .btn-choice:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .gif-card .btn-yes {
+            background: rgba(100, 200, 150, 0.15);
+            border-color: rgba(100, 200, 150, 0.3);
+            color: #2a5a3a;
+        }
+
+        .gif-card .btn-yes:hover {
+            background: rgba(100, 200, 150, 0.25);
+            border-color: rgba(100, 200, 150, 0.5);
+        }
+
+        .gif-card .btn-no {
+            background: rgba(200, 100, 100, 0.12);
+            border-color: rgba(200, 100, 100, 0.25);
+            color: #5a2a2a;
+        }
+
+        .gif-card .btn-no:hover {
+            background: rgba(200, 100, 100, 0.22);
+            border-color: rgba(200, 100, 100, 0.45);
+        }
+
+        /* ===== RESPONSE CARD ===== */
+        .response-card {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            z-index: 15;
+            background: rgba(255, 248, 240, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px 16px 32px 16px;
+            padding: 2.5rem 2.5rem 3rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 60px 120px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 182, 193, 0.1);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .response-card.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        .response-card .gif-container {
+            width: 100%;
+            max-width: 280px;
+            height: 180px;
+            margin: 0 auto 1.2rem;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #1a0e1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 182, 193, 0.1);
+            position: relative;
+        }
+
+        .response-card .gif-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .response-card .gif-container .gif-placeholder {
+            color: rgba(255, 220, 230, 0.2);
+            font-size: 2.5rem;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+        }
+
+        .response-card .gif-label {
+            position: absolute;
+            bottom: 6px;
+            right: 10px;
+            color: rgba(255, 220, 230, 0.1);
+            font-size: 0.5rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        .response-card .response-title {
+            font-family: 'Georgia', serif;
+            font-size: 1.3rem;
+            color: #2a1a1a;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .response-card .response-poetry {
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            color: #3a2a2a;
+            line-height: 2;
+            letter-spacing: 0.5px;
+            direction: rtl;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .response-card .btn-group-response {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .response-card .btn-close-site {
+            padding: 0.7rem 2.5rem;
+            border-radius: 60px;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(200, 100, 100, 0.2);
+            background: rgba(200, 100, 100, 0.08);
+            color: #5a2a2a;
+            min-width: 120px;
+        }
+
+        .response-card .btn-close-site:hover {
+            background: rgba(200, 100, 100, 0.18);
+            border-color: rgba(200, 100, 100, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .response-card .btn-close-site i {
+            margin-right: 8px;
+        }
+
+        @media (max-width: 550px) {
+            .envelope { width: 220px; height: 140px; }
+            .envelope .seal { font-size: 1.6rem; }
+            .envelope .click-hint { font-size: 0.55rem; bottom: -32px; }
+            .typing-text-display { font-size: 1.3rem; padding: 1.2rem; max-width: 92%; }
+            .letter-page { padding: 1.8rem 1.2rem 2.2rem; max-width: 92%; }
+            .letter-page h2 { font-size: 1.3rem; }
+            .letter-page .message-text { font-size: 1rem; }
+            .letter-page .page-icon { font-size: 2rem; }
+            .gif-card { padding: 1.8rem 1.2rem 2rem; }
+            .gif-card .gif-container { height: 150px; max-width: 220px; }
+            .gif-card .poetry-text { font-size: 0.95rem; }
+            .gif-card .btn-choice { padding: 0.5rem 1.5rem; font-size: 0.95rem; min-width: 80px; }
+            .response-card { padding: 1.8rem 1.2rem 2rem; }
+            .response-card .gif-container { height: 140px; max-width: 200px; }
+            .response-card .btn-close-site { padding: 0.5rem 1.5rem; font-size: 0.85rem; min-width: 100px; }
+            .upload-link { top: 16px; right: 16px; padding: 6px 14px; font-size: 0.55rem; }
+            .song-indicator { font-size: 0.45rem; bottom: 20px; }
+        }
+
+        @media (max-width: 400px) {
+            .typing-text-display { font-size: 1rem; padding: 1rem; }
+            .letter-page .message-text { font-size: 0.85rem; }
+            .letter-page { padding: 1.2rem 0.8rem 1.5rem; }
+            .gif-card .poetry-text { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="petal-container" id="petalContainer"></div>
+
+    <!-- TYPING OVERLAY -->
+    <div class="typing-overlay" id="typingOverlay">
+        <div class="typing-text-display" id="typingTextDisplay"></div>
+    </div>
+
+    <!-- ENVELOPE -->
+    <div class="envelope-container" id="envelopeContainer">
+        <div class="envelope" id="envelope">
+            <span class="seal">💌</span>
+            <span class="click-hint">✦ click to open ✦</span>
+        </div>
+    </div>
+
+    <!-- LETTER PAGE -->
+    <div class="letter-page" id="letterPage">
+        <span class="page-icon">💕</span>
+        <h2 id="letterTitle">ایک خط محبت کا</h2>
+        <div class="divider"></div>
+        <div class="message-text" id="letterMessage"></div>
+        <div class="footer-love">✦ forever in bloom ✦</div>
+    </div>
+
+    <!-- GIF CARD -->
+    <div class="gif-card-overlay" id="gifCardOverlay">
+        <div class="gif-card">
+            <div class="gif-container" id="gifContainer">
+                <img id="mainGif" src="" alt="GIF" style="display:none;">
+                <div class="gif-placeholder" id="mainGifPlaceholder">🌸</div>
+            </div>
+            <div class="poetry-text" id="poetryText">
+                تم ہو میری زندگی کا حسین خواب،<br>
+                تم ہو میری ہر خوشی کا پیغام۔
+            </div>
+            <div class="btn-group">
+                <button class="btn-choice btn-yes" id="btnYes">ہاں</button>
+                <button class="btn-choice btn-no" id="btnNo">نہیں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESPONSE CARD -->
+    <div class="response-card" id="responseCard">
+        <div class="gif-container" id="responseGifContainer">
+            <img id="responseGif" src="" alt="GIF" style="display:none;">
+            <div class="gif-placeholder" id="responseGifPlaceholder">💕</div>
+            <span class="gif-label" id="responseGifLabel">.gif</span>
+        </div>
+        <div class="response-title" id="responseTitle"></div>
+        <div class="response-poetry" id="responsePoetry"></div>
+        <div class="btn-group-response">
+            <button class="btn-close-site" id="closeSiteBtn">✧ Close Site ✧</button>
+        </div>
+    </div>
+
+    <a href="upload.html" class="upload-link">🎵 change song</a>
+
+    <div class="song-indicator">
+        <span class="name" id="songName">no song loaded</span>
+    </div>
+
+    <div class="credit">✦ forever in bloom ✦</div>
+
+    <script>
+        (function() {
+            // ============================================================
+            // ★★★★★ EMBEDDED SONG DATA ★★★★★
+            // ============================================================
+            // 
+            // INSTRUCTIONS:
+            // 1. Go to upload.html and upload your song
+            // 2. Click "Use This Song" - it will copy the code to your clipboard
+            // 3. Replace the EMBEDDED_SONG object below with your song data
+            // 4. Save and deploy - now your song will play on ANY device!
+            //
+            // ============================================================
+
+            // --- DEFAULT: No song embedded (will use localStorage as fallback) ---
+            const EMBEDDED_SONG = {
+                name: "",
+                data: "",
+                startTime: 0
+            };
+
+            // --- To embed your song, replace the above with the code from upload.html ---
+            // Example:
+            // const EMBEDDED_SONG = {
+            //     name: "my-song.mp3",
+            //     data: "data:audio/mpeg;base64,SUQzAwAAAAAA...",
+            //     startTime: 5
+            // };
+
+            // ============================================================
+
+            // ---------- CANVAS BACKGROUND ----------
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const orbs = [];
+            for (let i = 0; i < 8; i++) {
+                orbs.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    r: Math.random() * 240 + 140,
+                    hue: Math.floor(Math.random() * 40 + 330),
+                    alpha: Math.random() * 0.05 + 0.02,
+                    dx: (Math.random() - 0.5) * 0.1,
+                    dy: (Math.random() - 0.5) * 0.1 - 0.02,
+                    phase: Math.random() * 100,
+                });
+            }
+
+            const stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    size: Math.random() * 2.4 + 0.4,
+                    alpha: Math.random() * 0.5 + 0.2,
+                    speed: Math.random() * 0.01 + 0.003,
+                    phase: Math.random() * 100,
+                    hue: Math.floor(Math.random() * 30 + 340),
+                });
+            }
+
+            const hearts = [];
+            for (let i = 0; i < 45; i++) {
+                hearts.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    size: Math.random() * 16 + 6,
+                    dx: (Math.random() - 0.5) * 0.2,
+                    dy: (Math.random() - 0.5) * 0.2 - 0.07,
+                    alpha: Math.random() * 0.25 + 0.05,
+                    phase: Math.random() * 100,
+                    pulse: Math.random() * 0.01 + 0.004,
+                });
+            }
+
+            function drawHeart(ctx, x, y, size, alpha, hue) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(size / 20, size / 20);
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = `hsla(${hue || 340}, 90%, 70%, 0.8)`;
+                ctx.shadowColor = `hsla(${hue || 340}, 90%, 70%, 0.15)`;
+                ctx.shadowBlur = 25;
+                ctx.beginPath();
+                ctx.moveTo(0, 4);
+                ctx.bezierCurveTo(-6, -2, -14, 2, -14, 10);
+                ctx.bezierCurveTo(-14, 18, 0, 26, 0, 26);
+                ctx.bezierCurveTo(0, 26, 14, 18, 14, 10);
+                ctx.bezierCurveTo(14, 2, 6, -2, 0, 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            }
+
+            function draw(t) {
+                const grad = ctx.createRadialGradient(w * 0.3, h * 0.2, 100, w * 0.5, h * 0.4, w * 0.9);
+                grad.addColorStop(0, '#1a0e1e');
+                grad.addColorStop(0.4, '#120a18');
+                grad.addColorStop(0.8, '#0a0510');
+                grad.addColorStop(1, '#050208');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                for (let orb of orbs) {
+                    orb.x += orb.dx + Math.sin(t * 0.00015 + orb.phase) * 0.08;
+                    orb.y += orb.dy + Math.cos(t * 0.0002 + orb.phase) * 0.08;
+                    if (orb.x < -orb.r) orb.x = w + orb.r;
+                    if (orb.x > w + orb.r) orb.x = -orb.r;
+                    if (orb.y < -orb.r) orb.y = h + orb.r;
+                    if (orb.y > h + orb.r) orb.y = -orb.r;
+                    const g = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+                    g.addColorStop(0, `hsla(${orb.hue}, 90%, 70%, ${orb.alpha})`);
+                    g.addColorStop(0.5, `hsla(${orb.hue + 20}, 80%, 60%, ${orb.alpha * 0.3})`);
+                    g.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                for (let s of stars) {
+                    const alpha = s.alpha * (0.6 + 0.4 * Math.sin(t * s.speed + s.phase));
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${s.hue}, 80%, 90%, ${alpha})`;
+                    ctx.shadowColor = `hsla(${s.hue}, 80%, 90%, 0.08)`;
+                    ctx.shadowBlur = 14;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    s.x += Math.sin(t * 0.0003 + s.phase) * 0.03;
+                    s.y += Math.cos(t * 0.0004 + s.phase) * 0.03;
+                    if (s.x < -10) s.x = w + 10;
+                    if (s.x > w + 10) s.x = -10;
+                    if (s.y < -10) s.y = h + 10;
+                    if (s.y > h + 10) s.y = -10;
+                }
+
+                for (let hp of hearts) {
+                    hp.x += hp.dx + Math.sin(t * 0.0005 + hp.phase) * 0.05;
+                    hp.y += hp.dy + Math.cos(t * 0.0006 + hp.phase) * 0.04;
+                    if (hp.x < -20) hp.x = w + 20;
+                    if (hp.x > w + 20) hp.x = -20;
+                    if (hp.y < -20) hp.y = h + 20;
+                    if (hp.y > h + 20) hp.y = -20;
+                    const alpha = hp.alpha * (0.7 + 0.3 * Math.sin(t * hp.pulse + hp.phase));
+                    const size = hp.size * (0.9 + 0.1 * Math.sin(t * 0.002 + hp.phase));
+                    drawHeart(ctx, hp.x, hp.y, size, alpha, 340 + Math.sin(hp.phase) * 10);
+                }
+
+                ctx.save();
+                for (let i = 0; i < 4; i++) {
+                    const x = (Math.sin(t * 0.00004 + i * 2.1) * 0.45 + 0.5) * w;
+                    const y = (Math.cos(t * 0.00005 + i * 2.5) * 0.45 + 0.5) * h;
+                    const g = ctx.createRadialGradient(x, y, 5, x, y, 280);
+                    g.addColorStop(0, `rgba(255, 150, 180, 0.01)`);
+                    g.addColorStop(1, `rgba(255, 150, 180, 0)`);
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 280, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+
+            // ---------- PETALS ----------
+            const petalContainer = document.getElementById('petalContainer');
+            const petalSymbols = ['🌸', '🌷', '🌹', '🌺', '🌸', '💕', '❤️', '🩷', '✨', '🌷'];
+            for (let i = 0; i < 30; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.textContent = petalSymbols[Math.floor(Math.random() * petalSymbols.length)];
+                petal.style.left = Math.random() * 100 + '%';
+                petal.style.fontSize = (Math.random() * 1.8 + 0.8) + 'rem';
+                petal.style.animationDuration = (Math.random() * 14 + 10) + 's';
+                petal.style.animationDelay = (Math.random() * 18) + 's';
+                petal.style.opacity = Math.random() * 0.4 + 0.1;
+                petalContainer.appendChild(petal);
+            }
+
+            // ---------- SEQUENCE ----------
+            const urduLine = "کچھ احساسات ایسے ہوتے ہیں جو زبان سے نہیں، دل سے لکھے جاتے ہیں...";
+            const typingTextDisplay = document.getElementById('typingTextDisplay');
+            const typingOverlay = document.getElementById('typingOverlay');
+            const envelopeContainer = document.getElementById('envelopeContainer');
+            const letterPage = document.getElementById('letterPage');
+            const letterMessage = document.getElementById('letterMessage');
+            const gifCardOverlay = document.getElementById('gifCardOverlay');
+            const mainGif = document.getElementById('mainGif');
+            const mainGifPlaceholder = document.getElementById('mainGifPlaceholder');
+            const poetryText = document.getElementById('poetryText');
+            const responseCard = document.getElementById('responseCard');
+            const responseGif = document.getElementById('responseGif');
+            const responseGifPlaceholder = document.getElementById('responseGifPlaceholder');
+            const responseGifLabel = document.getElementById('responseGifLabel');
+            const responseTitle = document.getElementById('responseTitle');
+            const responsePoetry = document.getElementById('responsePoetry');
+
+            let typingStarted = false;
+            let envelopeOpened = false;
+            let letterTypingStarted = false;
+            let letterComplete = false;
+
+            // === CONFIGURABLE MESSAGES ===
+            const envelopeMessage = "تم ہو میری زندگی کی روشنی، تم ہو میری ہر خوشی کی وجہ۔\nتم ہو میرے دل کی دھڑکن، تم ہو میری ہر دعا کا حاصل۔";
+
+            const poetryLines = "تم ہو میری زندگی کا حسین خواب،\nتم ہو میری ہر خوشی کا پیغام۔\nتم ہو میری آنکھوں کی روشنی،\nتم ہو میرے دل کی دھڑکن کا نام۔";
+
+            const yesPoetry = "ہاں! میں نے کہا تھا نا،\nتم ہو میری دنیا کا سب سے خوبصورت خواب۔\nہر لمحہ تمہارے نام،\nہر سانس تمہارے پیغام۔";
+
+            const noPoetry = "نہیں! کیسے کہہ سکتے ہو نہیں،\nتم ہو میری زندگی کی روشنی۔\nدل تو پہلے ہی کہہ چکا ہے،\nتم ہو میری ہر خوشی، ہر دعا کی زبانی۔";
+
+            // === GIF URLs ===
+            const mainGifUrl = ""; // Leave empty to show placeholder
+            const gifYesUrl = ""; // Leave empty to show placeholder
+            const gifNoUrl = ""; // Leave empty to show placeholder
+
+            function startTypingSequence() {
+                if (typingStarted) return;
+                typingStarted = true;
+
+                typingOverlay.classList.add('visible');
+
+                let index = 0;
+                typingTextDisplay.innerHTML = '';
+                const speed = 35;
+
+                function typeChar() {
+                    if (index < urduLine.length) {
+                        const char = urduLine.charAt(index);
+                        if (index === urduLine.length - 1) {
+                            typingTextDisplay.innerHTML += char + '<span class="cursor"></span>';
+                        } else {
+                            typingTextDisplay.innerHTML += char;
+                        }
+                        index++;
+                        setTimeout(typeChar, speed);
+                    } else {
+                        const cursor = typingTextDisplay.querySelector('.cursor');
+                        if (cursor) cursor.remove();
+
+                        setTimeout(() => {
+                            typingOverlay.classList.remove('visible');
+                            setTimeout(() => {
+                                showEnvelope();
+                            }, 800);
+                        }, 2000);
+                    }
+                }
+                setTimeout(typeChar, 300);
+            }
+
+            function showEnvelope() {
+                envelopeContainer.classList.add('visible');
+
+                envelopeContainer.addEventListener('click', function openEnvelope(e) {
+                    if (envelopeOpened) return;
+                    envelopeOpened = true;
+
+                    envelopeContainer.classList.add('open');
+
+                    setTimeout(() => {
+                        letterPage.classList.add('visible');
+
+                        if (!letterTypingStarted) {
+                            letterTypingStarted = true;
+                            startLetterTyping();
+                        }
+                    }, 800);
+                });
+            }
+
+            function startLetterTyping() {
+                let index = 0;
+                letterMessage.innerHTML = '';
+                const fullMessage = envelopeMessage;
+                const speed = 20;
+
+                function typeLetterChar() {
+                    if (index < fullMessage.length) {
+                        const char = fullMessage.charAt(index);
+                        if (index === fullMessage.length - 1) {
+                            letterMessage.innerHTML += char + '<span class="cursor"></span>';
+                        } else {
+                            letterMessage.innerHTML += char;
+                        }
+                        index++;
+                        setTimeout(typeLetterChar, speed);
+                    } else {
+                        const cursor = letterMessage.querySelector('.cursor');
+                        if (cursor) cursor.remove();
+                        letterComplete = true;
+
+                        setTimeout(() => {
+                            showGifCard();
+                        }, 10000);
+                    }
+                }
+                setTimeout(typeLetterChar, 300);
+            }
+
+            function showGifCard() {
+                envelopeContainer.classList.remove('visible');
+                letterPage.classList.remove('visible');
+
+                gifCardOverlay.classList.add('visible');
+
+                poetryText.innerHTML = poetryLines.replace(/\n/g, '<br>');
+
+                if (mainGifUrl && mainGifUrl.length > 0) {
+                    mainGif.src = mainGifUrl;
+                    mainGif.style.display = 'block';
+                    mainGifPlaceholder.style.display = 'none';
+                } else {
+                    mainGif.style.display = 'none';
+                    mainGifPlaceholder.style.display = 'block';
+                    mainGifPlaceholder.textContent = '🌸 add GIF';
+                }
+            }
+
+            document.getElementById('btnYes').addEventListener('click', function() {
+                showResponse('yes');
+            });
+
+            document.getElementById('btnNo').addEventListener('click', function() {
+                showResponse('no');
+            });
+
+            function showResponse(choice) {
+                gifCardOverlay.classList.remove('visible');
+                responseCard.classList.add('visible');
+
+                if (choice === 'yes') {
+                    responseTitle.textContent = '✨ ہاں! ✨';
+                    responsePoetry.innerHTML = yesPoetry.replace(/\n/g, '<br>');
+                    responseGifLabel.textContent = 'yes.gif';
+
+                    if (gifYesUrl && gifYesUrl.length > 0) {
+                        responseGif.src = gifYesUrl;
+                        responseGif.style.display = 'block';
+                        responseGifPlaceholder.style.display = 'none';
+                    } else {
+                        responseGif.style.display = 'none';
+                        responseGifPlaceholder.style.display = 'block';
+                        responseGifPlaceholder.textContent = '💖';
+                    }
+                } else {
+                    responseTitle.textContent = '💔 نہیں...';
+                    responsePoetry.innerHTML = noPoetry.replace(/\n/g, '<br>');
+                    responseGifLabel.textContent = 'no.gif';
+
+                    if (gifNoUrl && gifNoUrl.length > 0) {
+                        responseGif.src = gifNoUrl;
+                        responseGif.style.display = 'block';
+                        responseGifPlaceholder.style.display = 'none';
+                    } else {
+                        responseGif.style.display = 'none';
+                        responseGifPlaceholder.style.display = 'block';
+                        responseGifPlaceholder.textContent = '😢';
+                    }
+                }
+            }
+
+            document.getElementById('closeSiteBtn').addEventListener('click', function() {
+                responseCard.classList.remove('visible');
+
+                setTimeout(function() {
+                    window.close();
+                    setTimeout(function() {
+                        document.body.innerHTML = '';
+                        document.body.style.background = '#0a0510';
+                        document.body.style.minHeight = '100vh';
+                        document.body.style.display = 'flex';
+                        document.body.style.alignItems = 'center';
+                        document.body.style.justifyContent = 'center';
+                        document.body.innerHTML = `
+                            <div style="color:rgba(255,220,230,0.2);font-family:'Georgia',serif;font-size:1.2rem;text-align:center;letter-spacing:3px;font-style:italic;padding:2rem;">
+                                ✦ thank you for visiting ✦<br>
+                                <span style="font-size:0.8rem;opacity:0.3;">you can close this tab now</span>
+                            </div>
+                        `;
+                    }, 500);
+                }, 400);
+            });
+
+            // ---------- LOAD SONG: Embedded OR localStorage ----------
+            const songNameEl = document.getElementById('songName');
+            let audioElement = null;
+            let songPlayed = false;
+
+            function loadSong() {
+                let songData = null;
+                let source = '';
+
+                // 1. Check for EMBEDDED_SONG first (permanent, works on any device)
+                if (EMBEDDED_SONG && EMBEDDED_SONG.data && EMBEDDED_SONG.data.length > 0) {
+                    songData = EMBEDDED_SONG;
+                    source = 'embedded';
+                    console.log('🎵 Using embedded song:', EMBEDDED_SONG.name);
+                } else {
+                    // 2. Fallback: localStorage (for testing)
+                    try {
+                        const stored = localStorage.getItem('romanticSong');
+                        if (stored) {
+                            const parsed = JSON.parse(stored);
+                            if (parsed && parsed.data && parsed.data.length > 0) {
+                                songData = parsed;
+                                source = 'localStorage';
+                                console.log('🎵 Using localStorage song:', parsed.name);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('localStorage read error:', e);
+                    }
+                }
+
+                if (!songData) {
+                    songNameEl.textContent = '⚠️ no song embedded — upload one';
+                    return;
+                }
+
+                songNameEl.textContent = '♪ ' + songData.name + (source === 'embedded' ? ' ★' : '');
+
+                audioElement = new Audio(songData.data);
+                audioElement.loop = true;
+                audioElement.volume = 0.5;
+
+                const startTime = songData.startTime || 0;
+                if (startTime > 0) {
+                    audioElement.currentTime = startTime;
+                }
+
+                function playSong() {
+                    if (songPlayed) return;
+                    songPlayed = true;
+
+                    audioElement.play().then(() => {
+                        console.log('🎵 Playing:', songData.name, 'from', startTime, 's');
+                        songNameEl.textContent = '♪ ' + songData.name + '  ·  playing';
+
+                        setTimeout(() => {
+                            if (audioElement) {
+                                audioElement.volume = 0.2;
+                                console.log('🔊 Volume reduced to 20%');
+                            }
+                            startTypingSequence();
+                        }, 2000);
+
+                    }).catch(err => {
+                        console.warn('Play error:', err);
+                        document.addEventListener('click', function tryPlay() {
+                            audioElement.play().catch(() => {});
+                            document.removeEventListener('click', tryPlay);
+                        }, { once: true });
+                    });
+                }
+
+                audioElement.play().then(() => {
+                    songPlayed = true;
+                    songNameEl.textContent = '♪ ' + songData.name + '  ·  playing';
+
+                    setTimeout(() => {
+                        if (audioElement) {
+                            audioElement.volume = 0.2;
+                            console.log('🔊 Volume reduced to 20%');
+                        }
+                        startTypingSequence();
+                    }, 2000);
+
+                }).catch(() => {
+                    songNameEl.textContent = '♪ ' + songData.name + '  ·  click to play';
+                    document.addEventListener('click', playSong, { once: true });
+                    document.addEventListener('touchstart', playSong, { once: true });
+                });
+            }
+
+            loadSong();
+
+            // ---------- CLICK TO SPAWN HEARTS ----------
+            canvas.addEventListener('click', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                for (let i = 0; i < 15; i++) {
+                    const hp = {
+                        x: mx + (Math.random() - 0.5) * 150,
+                        y: my + (Math.random() - 0.5) * 150,
+                        size: Math.random() * 20 + 10,
+                        dx: (Math.random() - 0.5) * 2.0,
+                        dy: (Math.random() - 0.5) * 2.0 - 0.8,
+                        alpha: Math.random() * 0.5 + 0.2,
+                        phase: Math.random() * 100,
+                        pulse: Math.random() * 0.01 + 0.004,
+                    };
+                    hearts.push(hp);
+                    setTimeout(() => {
+                        const idx = hearts.indexOf(hp);
+                        if (idx > -1) hearts.splice(idx, 1);
+                    }, 3000);
+                }
+
+                for (let i = 0; i < 20; i++) {
+                    const s = {
+                        x: mx + (Math.random() - 0.5) * 180,
+                        y: my + (Math.random() - 0.5) * 180,
+                        size: Math.random() * 4 + 1,
+                        alpha: Math.random() * 0.7 + 0.3,
+                        speed: Math.random() * 0.02 + 0.008,
+                        phase: Math.random() * 100,
+                        hue: Math.floor(Math.random() * 30 + 340),
+                    };
+                    stars.push(s);
+                    setTimeout(() => {
+                        const idx = stars.indexOf(s);
+                        if (idx > -1) stars.splice(idx, 1);
+                    }, 2500);
+                }
+            });
+
+            console.log('💖 Full sequence: typing → envelope → letter → GIF card → Yes/No → Close button');
+            console.log('📌 Song source:', EMBEDDED_SONG.data ? 'EMBEDDED (works on all devices)' : 'localStorage (only this device)');
+        })();
+    </script>
+</body>
+</html>

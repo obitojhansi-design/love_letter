@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Upload Your Song · Romantic Background</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #0a0510;
+            overflow: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            display: block;
+        }
+
+        .petal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .petal {
+            position: absolute;
+            color: rgba(255, 182, 193, 0.3);
+            font-size: 1.4rem;
+            animation: fall linear infinite;
+            opacity: 0;
+            user-select: none;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg) scale(0.6); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(110vh) rotate(720deg) scale(1.2); opacity: 0; }
+        }
+
+        @media (max-width: 550px) {
+            .petal { font-size: 1rem; }
+        }
+
+        .upload-card {
+            position: relative;
+            z-index: 10;
+            max-width: 560px;
+            width: 92%;
+            background: rgba(255, 245, 235, 0.05);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border-radius: 48px 16px 48px 16px;
+            padding: 2.8rem 2.5rem 3rem;
+            text-align: center;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 182, 193, 0.12);
+            border: 1px solid rgba(255, 182, 193, 0.1);
+            animation: cardFloat 10s infinite alternate ease-in-out;
+        }
+
+        @keyframes cardFloat {
+            0% { transform: translateY(0px) scale(1); box-shadow: 0 50px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,182,193,0.06); }
+            100% { transform: translateY(-8px) scale(1.01); box-shadow: 0 70px 130px rgba(0,0,0,0.8), 0 0 40px 8px rgba(255,105,180,0.08); }
+        }
+
+        .upload-card .icon-top {
+            font-size: 2.8rem;
+            margin-bottom: 0.2rem;
+            display: block;
+            animation: pulseHeart 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseHeart {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+
+        .upload-card h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #ffb6c1, #ff69b4, #ff1493);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.2rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .upload-card .sub {
+            font-size: 0.85rem;
+            font-weight: 300;
+            color: rgba(255, 200, 210, 0.5);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            border-bottom: 1px dashed rgba(255, 182, 193, 0.1);
+            padding-bottom: 0.8rem;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 182, 193, 0.15);
+            border-radius: 24px;
+            padding: 2rem 1.5rem;
+            margin: 1rem 0 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(255, 182, 193, 0.02);
+        }
+
+        .upload-area:hover {
+            border-color: rgba(255, 182, 193, 0.3);
+            background: rgba(255, 182, 193, 0.04);
+        }
+
+        .upload-area .upload-icon {
+            font-size: 2.8rem;
+            color: rgba(255, 182, 193, 0.2);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area .upload-text {
+            color: rgba(255, 220, 230, 0.4);
+            font-size: 0.9rem;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .upload-area .upload-text strong {
+            color: rgba(255, 182, 193, 0.6);
+        }
+
+        .upload-area .file-name-display {
+            color: #ff69b4;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .upload-area .file-name-display.show {
+            display: block;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .timer-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 1rem 0 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .timer-row label {
+            color: rgba(255, 220, 230, 0.3);
+            font-size: 0.8rem;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .timer-row input[type="number"] {
+            background: rgba(255, 182, 193, 0.06);
+            border: 1px solid rgba(255, 182, 193, 0.1);
+            border-radius: 12px;
+            padding: 8px 14px;
+            color: rgba(255, 220, 230, 0.7);
+            font-size: 0.9rem;
+            width: 80px;
+            font-family: 'Georgia', serif;
+            outline: none;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .timer-row input[type="number"]:focus {
+            border-color: rgba(255, 105, 180, 0.3);
+            background: rgba(255, 182, 193, 0.1);
+        }
+
+        .timer-row .unit {
+            color: rgba(255, 220, 230, 0.2);
+            font-size: 0.7rem;
+            font-style: italic;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            background: rgba(255, 105, 180, 0.08);
+            border: 1px solid rgba(255, 105, 180, 0.15);
+            color: rgba(255, 220, 230, 0.5);
+            padding: 0.7rem 2rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 105, 180, 0.16);
+            border-color: rgba(255, 105, 180, 0.3);
+            color: rgba(255, 220, 230, 0.8);
+            transform: scale(1.02);
+        }
+
+        .btn-primary {
+            background: rgba(255, 105, 180, 0.15);
+            border-color: rgba(255, 105, 180, 0.25);
+            color: #ffb6c1;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 105, 180, 0.25);
+            border-color: #ff69b4;
+            color: white;
+            box-shadow: 0 0 40px rgba(255, 105, 180, 0.1);
+        }
+
+        .btn-success {
+            background: rgba(100, 255, 150, 0.08);
+            border-color: rgba(100, 255, 150, 0.15);
+            color: rgba(100, 255, 150, 0.5);
+        }
+
+        .btn-success:hover {
+            background: rgba(100, 255, 150, 0.16);
+            border-color: rgba(100, 255, 150, 0.3);
+            color: rgba(100, 255, 150, 0.8);
+        }
+
+        .btn i {
+            font-size: 1rem;
+        }
+
+        .status-bar {
+            margin-top: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 12px;
+            background: rgba(255, 182, 193, 0.03);
+            border: 1px solid rgba(255, 182, 193, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 44px;
+        }
+
+        .status-bar .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 182, 193, 0.1);
+            transition: all 0.3s;
+        }
+
+        .status-bar .status-dot.playing {
+            background: #ff69b4;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+            animation: pulseDot 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.6); opacity: 0.6; }
+        }
+
+        .status-bar .status-text {
+            color: rgba(255, 220, 230, 0.3);
+            font-size: 0.7rem;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .status-bar .status-text.active {
+            color: rgba(255, 220, 230, 0.7);
+        }
+
+        .status-bar .status-time {
+            color: rgba(255, 220, 230, 0.2);
+            font-size: 0.65rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .footer-note {
+            margin-top: 1.8rem;
+            font-size: 0.6rem;
+            color: rgba(255, 200, 210, 0.08);
+            letter-spacing: 3px;
+            font-style: italic;
+        }
+
+        @media (max-width: 550px) {
+            .upload-card {
+                padding: 1.8rem 1.2rem 2rem;
+                border-radius: 36px 12px 36px 12px;
+            }
+            .upload-card h1 { font-size: 1.6rem; }
+            .upload-area { padding: 1.2rem 1rem; }
+            .btn { padding: 0.5rem 1.2rem; font-size: 0.75rem; }
+            .timer-row input[type="number"] { width: 60px; padding: 6px 10px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="petal-container" id="petalContainer"></div>
+
+    <div class="upload-card">
+        <span class="icon-top">🎵</span>
+        <h1>Upload Your Song</h1>
+        <div class="sub">✨ set the mood ✨</div>
+
+        <div class="upload-area" id="uploadArea">
+            <span class="upload-icon">♫</span>
+            <div class="upload-text">
+                <strong>click here</strong> or drag & drop<br>
+                <span style="font-size:0.7rem; opacity:0.5;">MP3, WAV, M4A, OGG</span>
+            </div>
+            <div class="file-name-display" id="fileNameDisplay"></div>
+            <input type="file" id="musicUpload" accept="audio/*">
+        </div>
+
+        <div class="timer-row">
+            <label>⏱ start at</label>
+            <input type="number" id="timerInput" placeholder="0" min="0" step="0.1" value="0">
+            <span class="unit">seconds</span>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" id="playBtn">
+                <i class="fas fa-play" id="playIcon"></i> <span id="playLabel">Test</span>
+            </button>
+            <button class="btn btn-success" id="saveBtn">
+                <i class="fas fa-check"></i> Use This Song
+            </button>
+        </div>
+
+        <div class="status-bar">
+            <span class="status-dot" id="statusDot"></span>
+            <span class="status-text" id="statusText">no song uploaded</span>
+            <span class="status-time" id="statusTime"></span>
+        </div>
+
+        <div class="footer-note">✦ upload · test · save ✦</div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const orbs = [];
+            for (let i = 0; i < 8; i++) {
+                orbs.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    r: Math.random() * 240 + 140,
+                    hue: Math.floor(Math.random() * 40 + 330),
+                    alpha: Math.random() * 0.05 + 0.02,
+                    dx: (Math.random() - 0.5) * 0.1,
+                    dy: (Math.random() - 0.5) * 0.1 - 0.02,
+                    phase: Math.random() * 100,
+                });
+            }
+
+            const stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    size: Math.random() * 2.4 + 0.4,
+                    alpha: Math.random() * 0.5 + 0.2,
+                    speed: Math.random() * 0.01 + 0.003,
+                    phase: Math.random() * 100,
+                    hue: Math.floor(Math.random() * 30 + 340),
+                });
+            }
+
+            const hearts = [];
+            for (let i = 0; i < 45; i++) {
+                hearts.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    size: Math.random() * 16 + 6,
+                    dx: (Math.random() - 0.5) * 0.2,
+                    dy: (Math.random() - 0.5) * 0.2 - 0.07,
+                    alpha: Math.random() * 0.25 + 0.05,
+                    phase: Math.random() * 100,
+                    pulse: Math.random() * 0.01 + 0.004,
+                });
+            }
+
+            function drawHeart(ctx, x, y, size, alpha, hue) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(size / 20, size / 20);
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = `hsla(${hue || 340}, 90%, 70%, 0.8)`;
+                ctx.shadowColor = `hsla(${hue || 340}, 90%, 70%, 0.15)`;
+                ctx.shadowBlur = 25;
+                ctx.beginPath();
+                ctx.moveTo(0, 4);
+                ctx.bezierCurveTo(-6, -2, -14, 2, -14, 10);
+                ctx.bezierCurveTo(-14, 18, 0, 26, 0, 26);
+                ctx.bezierCurveTo(0, 26, 14, 18, 14, 10);
+                ctx.bezierCurveTo(14, 2, 6, -2, 0, 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            }
+
+            function draw(t) {
+                const grad = ctx.createRadialGradient(w * 0.3, h * 0.2, 100, w * 0.5, h * 0.4, w * 0.9);
+                grad.addColorStop(0, '#1a0e1e');
+                grad.addColorStop(0.4, '#120a18');
+                grad.addColorStop(0.8, '#0a0510');
+                grad.addColorStop(1, '#050208');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                for (let orb of orbs) {
+                    orb.x += orb.dx + Math.sin(t * 0.00015 + orb.phase) * 0.08;
+                    orb.y += orb.dy + Math.cos(t * 0.0002 + orb.phase) * 0.08;
+                    if (orb.x < -orb.r) orb.x = w + orb.r;
+                    if (orb.x > w + orb.r) orb.x = -orb.r;
+                    if (orb.y < -orb.r) orb.y = h + orb.r;
+                    if (orb.y > h + orb.r) orb.y = -orb.r;
+                    const g = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+                    g.addColorStop(0, `hsla(${orb.hue}, 90%, 70%, ${orb.alpha})`);
+                    g.addColorStop(0.5, `hsla(${orb.hue + 20}, 80%, 60%, ${orb.alpha * 0.3})`);
+                    g.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                for (let s of stars) {
+                    const alpha = s.alpha * (0.6 + 0.4 * Math.sin(t * s.speed + s.phase));
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${s.hue}, 80%, 90%, ${alpha})`;
+                    ctx.shadowColor = `hsla(${s.hue}, 80%, 90%, 0.08)`;
+                    ctx.shadowBlur = 14;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    s.x += Math.sin(t * 0.0003 + s.phase) * 0.03;
+                    s.y += Math.cos(t * 0.0004 + s.phase) * 0.03;
+                    if (s.x < -10) s.x = w + 10;
+                    if (s.x > w + 10) s.x = -10;
+                    if (s.y < -10) s.y = h + 10;
+                    if (s.y > h + 10) s.y = -10;
+                }
+
+                for (let hp of hearts) {
+                    hp.x += hp.dx + Math.sin(t * 0.0005 + hp.phase) * 0.05;
+                    hp.y += hp.dy + Math.cos(t * 0.0006 + hp.phase) * 0.04;
+                    if (hp.x < -20) hp.x = w + 20;
+                    if (hp.x > w + 20) hp.x = -20;
+                    if (hp.y < -20) hp.y = h + 20;
+                    if (hp.y > h + 20) hp.y = -20;
+                    const alpha = hp.alpha * (0.7 + 0.3 * Math.sin(t * hp.pulse + hp.phase));
+                    const size = hp.size * (0.9 + 0.1 * Math.sin(t * 0.002 + hp.phase));
+                    drawHeart(ctx, hp.x, hp.y, size, alpha, 340 + Math.sin(hp.phase) * 10);
+                }
+
+                ctx.save();
+                for (let i = 0; i < 4; i++) {
+                    const x = (Math.sin(t * 0.00004 + i * 2.1) * 0.45 + 0.5) * w;
+                    const y = (Math.cos(t * 0.00005 + i * 2.5) * 0.45 + 0.5) * h;
+                    const g = ctx.createRadialGradient(x, y, 5, x, y, 280);
+                    g.addColorStop(0, `rgba(255, 150, 180, 0.01)`);
+                    g.addColorStop(1, `rgba(255, 150, 180, 0)`);
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 280, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+
+            // ---------- PETALS ----------
+            const petalContainer = document.getElementById('petalContainer');
+            const petalSymbols = ['🌸', '🌷', '🌹', '🌺', '🌸', '💕', '❤️', '🩷', '✨', '🌷'];
+            for (let i = 0; i < 30; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.textContent = petalSymbols[Math.floor(Math.random() * petalSymbols.length)];
+                petal.style.left = Math.random() * 100 + '%';
+                petal.style.fontSize = (Math.random() * 1.8 + 0.8) + 'rem';
+                petal.style.animationDuration = (Math.random() * 14 + 10) + 's';
+                petal.style.animationDelay = (Math.random() * 18) + 's';
+                petal.style.opacity = Math.random() * 0.4 + 0.1;
+                petalContainer.appendChild(petal);
+            }
+
+            // ---------- MUSIC PLAYER ----------
+            let audioElement = null;
+            let isPlaying = false;
+            let uploadedFile = null;
+            let uploadedFileName = '';
+
+            const uploadArea = document.getElementById('uploadArea');
+            const musicUpload = document.getElementById('musicUpload');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const timerInput = document.getElementById('timerInput');
+            const playBtn = document.getElementById('playBtn');
+            const playIcon = document.getElementById('playIcon');
+            const playLabel = document.getElementById('playLabel');
+            const saveBtn = document.getElementById('saveBtn');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const statusTime = document.getElementById('statusTime');
+
+            uploadArea.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'INPUT') {
+                    musicUpload.click();
+                }
+            });
+
+            musicUpload.addEventListener('change', function(e) {
+                const file = this.files[0];
+                if (file) {
+                    uploadedFile = file;
+                    uploadedFileName = file.name;
+                    fileNameDisplay.textContent = '📁 ' + file.name;
+                    fileNameDisplay.className = 'file-name-display show';
+                    statusText.textContent = '✅ ready to test';
+                    statusText.className = 'status-text active';
+                    statusDot.className = 'status-dot';
+
+                    timerInput.value = 0;
+
+                    if (audioElement) {
+                        audioElement.pause();
+                        audioElement = null;
+                    }
+                    const url = URL.createObjectURL(file);
+                    audioElement = new Audio(url);
+                    audioElement.loop = true;
+                    audioElement.volume = 0.5;
+
+                    isPlaying = false;
+                    playIcon.className = 'fas fa-play';
+                    playLabel.textContent = 'Test';
+
+                    audioElement.addEventListener('loadedmetadata', function() {
+                        const dur = audioElement.duration;
+                        if (dur && isFinite(dur)) {
+                            statusTime.textContent = '⏱ ' + Math.floor(dur) + 's';
+                        }
+                    });
+                }
+            });
+
+            playBtn.addEventListener('click', function() {
+                if (!audioElement) {
+                    statusText.textContent = '⚠️ upload a song first';
+                    statusText.className = 'status-text';
+                    return;
+                }
+
+                if (isPlaying) {
+                    audioElement.pause();
+                    isPlaying = false;
+                    playIcon.className = 'fas fa-play';
+                    playLabel.textContent = 'Test';
+                    statusDot.className = 'status-dot';
+                    statusText.textContent = '⏸ paused';
+                    statusText.className = 'status-text active';
+                } else {
+                    const startSec = parseFloat(timerInput.value) || 0;
+                    if (startSec > 0 && audioElement.duration && startSec < audioElement.duration) {
+                        audioElement.currentTime = startSec;
+                    } else if (startSec > 0) {
+                        audioElement.currentTime = 0;
+                    }
+
+                    audioElement.play().then(() => {
+                        isPlaying = true;
+                        playIcon.className = 'fas fa-pause';
+                        playLabel.textContent = 'Pause';
+                        statusDot.className = 'status-dot playing';
+                        statusText.textContent = '▶ playing from ' + (parseFloat(timerInput.value) || 0) + 's';
+                        statusText.className = 'status-text active';
+                    }).catch(err => {
+                        console.warn('Play error:', err);
+                        statusText.textContent = '⚠️ error playing';
+                    });
+                }
+            });
+
+            timerInput.addEventListener('change', function() {
+                if (audioElement && isPlaying) {
+                    const sec = parseFloat(this.value) || 0;
+                    if (sec < audioElement.duration) {
+                        audioElement.currentTime = sec;
+                        statusText.textContent = '▶ jumped to ' + sec + 's';
+                    }
+                }
+            });
+
+            // --- SAVE: Generate embeddable code ---
+            saveBtn.addEventListener('click', function() {
+                if (!uploadedFile) {
+                    statusText.textContent = '⚠️ please upload a song first';
+                    statusText.className = 'status-text';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const base64Data = e.target.result;
+                        const songName = uploadedFileName;
+                        const startTime = parseFloat(timerInput.value) || 0;
+
+                        // Show the embed code
+                        const embedCode = `<script>
+                            // === EMBEDDED SONG DATA ===
+                            const EMBEDDED_SONG = {
+                                name: "${songName}",
+                                data: "${base64Data}",
+                                startTime: ${startTime}
+                            };
+                            <\/script>`;
+
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(embedCode).then(() => {
+                            statusText.textContent = '✅ Code copied! Paste into index.html';
+                            statusText.className = 'status-text active';
+                            statusDot.className = 'status-dot';
+                            saveBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+
+                            // Also save to localStorage for immediate use
+                            const data = {
+                                name: songName,
+                                data: base64Data,
+                                startTime: startTime
+                            };
+                            localStorage.setItem('romanticSong', JSON.stringify(data));
+
+                            // Show full instruction
+                            alert(
+                                '✅ SONG DATA COPIED TO CLIPBOARD!\n\n' +
+                                '1. Open index.html\n' +
+                                '2. Find the EMBEDDED_SONG section\n' +
+                                '3. Replace the existing data with the copied code\n' +
+                                '4. Save and deploy again\n\n' +
+                                'This will make your song play on ANY device!\n' +
+                                'The song data is also saved locally for testing.'
+                            );
+
+                            setTimeout(() => {
+                                saveBtn.innerHTML = '<i class="fas fa-check"></i> Use This Song';
+                            }, 3000);
+                        }).catch(() => {
+                            // Fallback: show in a textarea
+                            statusText.textContent = '⚠️ Copy manually from console';
+                            console.log('=== COPY THIS CODE ===');
+                            console.log(embedCode);
+                            console.log('=== END CODE ===');
+                            alert(
+                                '📋 Copy the code from the browser console.\n' +
+                                'Open Developer Tools (F12) → Console tab\n' +
+                                'Look for the EMBEDDED_SONG code and copy it.'
+                            );
+                        });
+
+                    } catch (err) {
+                        statusText.textContent = '⚠️ error: ' + err.message;
+                        statusText.className = 'status-text';
+                    }
+                };
+                reader.readAsDataURL(uploadedFile);
+            });
+
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'rgba(255,105,180,0.4)';
+                this.style.background = 'rgba(255,105,180,0.05)';
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'rgba(255,182,193,0.15)';
+                this.style.background = 'rgba(255,182,193,0.02)';
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'rgba(255,182,193,0.15)';
+                this.style.background = 'rgba(255,182,193,0.02)';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    musicUpload.files = files;
+                    musicUpload.dispatchEvent(new Event('change'));
+                }
+            });
+
+            console.log('🎵 Upload page ready — upload song, then click "Use This Song" to get embed code');
+        })();
+    </script>
+</body>
+</html>
