@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💖 Romantic Background · With Your Song</title>
     <style>
-        /* ===== ALL YOUR EXISTING CSS HERE (KEEP AS IS) ===== */
+        /* ===== ALL YOUR EXISTING CSS HERE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -59,31 +59,6 @@
 
         @media (max-width: 550px) {
             .petal { font-size: 1rem; }
-        }
-
-        .upload-link {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 20;
-            background: rgba(255, 182, 193, 0.06);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 182, 193, 0.08);
-            border-radius: 30px;
-            padding: 8px 18px;
-            color: rgba(255, 220, 230, 0.25);
-            font-family: 'Georgia', serif;
-            font-size: 0.65rem;
-            text-decoration: none;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-            font-style: italic;
-        }
-
-        .upload-link:hover {
-            background: rgba(255, 182, 193, 0.1);
-            border-color: rgba(255, 182, 193, 0.15);
-            color: rgba(255, 220, 230, 0.5);
         }
 
         .song-indicator {
@@ -619,10 +594,6 @@
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .response-card .btn-close-site i {
-            margin-right: 8px;
-        }
-
         @media (max-width: 550px) {
             .envelope { width: 220px; height: 140px; }
             .envelope .seal { font-size: 1.6rem; }
@@ -639,7 +610,6 @@
             .response-card { padding: 1.8rem 1.2rem 2rem; }
             .response-card .gif-container { height: 140px; max-width: 200px; }
             .response-card .btn-close-site { padding: 0.5rem 1.5rem; font-size: 0.85rem; min-width: 100px; }
-            .upload-link { top: 16px; right: 16px; padding: 6px 14px; font-size: 0.55rem; }
             .song-indicator { font-size: 0.45rem; bottom: 20px; }
         }
 
@@ -709,10 +679,8 @@
         </div>
     </div>
 
-    <a href="upload.html" class="upload-link">🎵 change song</a>
-
     <div class="song-indicator">
-        <span class="name" id="songName">no song loaded</span>
+        <span class="name" id="songName">♪ love.mp3 · playing</span>
     </div>
 
     <div class="credit">✦ forever in bloom ✦</div>
@@ -720,31 +688,20 @@
     <script>
         (function() {
             // ============================================================
-            // ★★★★★ EMBEDDED SONG DATA ★★★★★
+            // ★★★★★ YOUR SONG - HARDCODED LIKE A GIF ★★★★★
             // ============================================================
             // 
             // INSTRUCTIONS:
-            // 1. Go to upload.html and upload your song
-            // 2. Click "Use This Song" - it will copy the code to your clipboard
-            // 3. Replace the EMBEDDED_SONG object below with your song data
-            // 4. Save and deploy - now your song will play on ANY device!
+            // 1. Upload your song file (love.mp3) to your repository
+            // 2. Update the URL below to point to your song file
+            // 3. That's it! No upload system needed anymore
             //
             // ============================================================
 
-            // --- DEFAULT: No song embedded (will use localStorage as fallback) ---
-            const EMBEDDED_SONG = {
-                name: "",
-                data: "",
-                startTime: 0
-            };
-
-            // --- To embed your song, replace the above with the code from upload.html ---
-            // Example:
-            // const EMBEDDED_SONG = {
-            //     name: "my-song.mp3",
-            //     data: "data:audio/mpeg;base64,SUQzAwAAAAAA...",
-            //     startTime: 5
-            // };
+            // --- SONG URL (like how you'd add a GIF) ---
+            const SONG_URL = "love.mp3";  // ← Put your song file name here
+            const SONG_NAME = "love.mp3";
+            const START_TIME = 30;  // Start time in seconds
 
             // ============================================================
 
@@ -1112,49 +1069,35 @@
                 }, 400);
             });
 
-            // ---------- LOAD SONG: Embedded OR localStorage ----------
+            // ---------- LOAD SONG (Hardcoded URL like a GIF) ----------
             const songNameEl = document.getElementById('songName');
             let audioElement = null;
             let songPlayed = false;
 
             function loadSong() {
-                let songData = null;
-                let source = '';
-
-                // 1. Check for EMBEDDED_SONG first (permanent, works on any device)
-                if (EMBEDDED_SONG && EMBEDDED_SONG.data && EMBEDDED_SONG.data.length > 0) {
-                    songData = EMBEDDED_SONG;
-                    source = 'embedded';
-                    console.log('🎵 Using embedded song:', EMBEDDED_SONG.name);
-                } else {
-                    // 2. Fallback: localStorage (for testing)
-                    try {
-                        const stored = localStorage.getItem('romanticSong');
-                        if (stored) {
-                            const parsed = JSON.parse(stored);
-                            if (parsed && parsed.data && parsed.data.length > 0) {
-                                songData = parsed;
-                                source = 'localStorage';
-                                console.log('🎵 Using localStorage song:', parsed.name);
-                            }
-                        }
-                    } catch (e) {
-                        console.warn('localStorage read error:', e);
-                    }
-                }
-
-                if (!songData) {
-                    songNameEl.textContent = '⚠️ no song embedded — upload one';
+                // Check if song URL is valid
+                if (!SONG_URL || SONG_URL.length === 0) {
+                    songNameEl.textContent = '⚠️ no song file specified';
                     return;
                 }
 
-                songNameEl.textContent = '♪ ' + songData.name + (source === 'embedded' ? ' ★' : '');
+                songNameEl.textContent = '♪ ' + SONG_NAME + ' · loading...';
 
-                audioElement = new Audio(songData.data);
+                audioElement = new Audio(SONG_URL);
                 audioElement.loop = true;
                 audioElement.volume = 0.5;
 
-                const startTime = songData.startTime || 0;
+                audioElement.addEventListener('canplaythrough', function() {
+                    console.log('🎵 Song loaded successfully:', SONG_URL);
+                    songNameEl.textContent = '♪ ' + SONG_NAME + ' · ready';
+                });
+
+                audioElement.addEventListener('error', function(e) {
+                    console.error('❌ Error loading song:', e);
+                    songNameEl.textContent = '⚠️ song not found - check file path';
+                });
+
+                const startTime = START_TIME || 0;
                 if (startTime > 0) {
                     audioElement.currentTime = startTime;
                 }
@@ -1164,8 +1107,8 @@
                     songPlayed = true;
 
                     audioElement.play().then(() => {
-                        console.log('🎵 Playing:', songData.name, 'from', startTime, 's');
-                        songNameEl.textContent = '♪ ' + songData.name + '  ·  playing';
+                        console.log('🎵 Playing:', SONG_NAME, 'from', startTime, 's');
+                        songNameEl.textContent = '♪ ' + SONG_NAME + ' · playing';
 
                         setTimeout(() => {
                             if (audioElement) {
@@ -1177,6 +1120,7 @@
 
                     }).catch(err => {
                         console.warn('Play error:', err);
+                        songNameEl.textContent = '♪ ' + SONG_NAME + ' · click to play';
                         document.addEventListener('click', function tryPlay() {
                             audioElement.play().catch(() => {});
                             document.removeEventListener('click', tryPlay);
@@ -1186,7 +1130,7 @@
 
                 audioElement.play().then(() => {
                     songPlayed = true;
-                    songNameEl.textContent = '♪ ' + songData.name + '  ·  playing';
+                    songNameEl.textContent = '♪ ' + SONG_NAME + ' · playing';
 
                     setTimeout(() => {
                         if (audioElement) {
@@ -1197,7 +1141,7 @@
                     }, 2000);
 
                 }).catch(() => {
-                    songNameEl.textContent = '♪ ' + songData.name + '  ·  click to play';
+                    songNameEl.textContent = '♪ ' + SONG_NAME + ' · click to play';
                     document.addEventListener('click', playSong, { once: true });
                     document.addEventListener('touchstart', playSong, { once: true });
                 });
@@ -1247,8 +1191,8 @@
                 }
             });
 
-            console.log('💖 Full sequence: typing → envelope → letter → GIF card → Yes/No → Close button');
-            console.log('📌 Song source:', EMBEDDED_SONG.data ? 'EMBEDDED (works on all devices)' : 'localStorage (only this device)');
+            console.log('💖 Song loaded from:', SONG_URL);
+            console.log('📌 This song will play on ANY device that can access this file');
         })();
     </script>
 </body>
